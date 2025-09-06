@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ legend }}{% endblock %} {# legend is already translated in the route #}
+
+{% block content %}
+    <h2 class="mb-4">{{ legend }}</h2> {# legend is already translated in the route #}
+    <form method="POST" action="" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <fieldset>
+
+            <div class="row g-3 g-lg-4">
+              <div class="col-12 col-lg-8">
+                <div class="card mb-3 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                    <div class="card-header"><h5><i class="bi bi-info-circle-fill me-2"></i>{{ _('Meeting Details') }}</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="{{ form.title.id }}" class="form-label">{{ _('Title') }}</label>
+                            {{ form.title(class="form-control rounded-3", placeholder=(current_locale=='fa' and 'عنوان جلسه را وارد کنید' or _('Enter the meeting title'))) }}
+                            {% if form.title.errors %}<div class="invalid-feedback d-block">{{ _(form.title.errors[0]) }}</div>{% endif %}
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.meeting_date.id }}" class="form-label">{{ _('Meeting Date') }}</label>
+                                <div class="input-group">
+                                  {{ form.meeting_date(class="form-control rounded-3", type='date', autocomplete='off') }}
+                                  <button type="button" class="btn btn-outline-secondary jdp-open rounded-3" onclick="this.previousElementSibling.showPicker && this.previousElementSibling.showPicker();"><i class="bi bi-calendar-event"></i></button>
+                                </div>
+                                {% if form.meeting_date.errors %}<div class="invalid-feedback d-block">{{ _(form.meeting_date.errors[0]) }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.company.id }}" class="form-label">{{ _('Company') }}</label>
+                                {{ form.company(class="form-select rounded-3", id="companySelect") }}
+                                <div id="customLogoUploader" class="mt-2" style="display:none;">
+                                  <label class="form-label">{{ current_locale=='fa' and 'لوگوی شرکت' or _('Company Logo') }}</label>
+                                  <input type="file" name="company_logo" accept="image/*" class="form-control rounded-3" />
+                                  <input type="hidden" name="company_logo_name" id="company_logo_name" />
+                                  <div class="form-text">{{ current_locale=='fa' and 'در صورت انتخاب شرکت دیگر، لوگو را بارگذاری کنید' or 'Upload logo when choosing Other' }}</div>
+                                </div>
+                                <div id="customCompanyName" class="mt-2" style="display:none;">
+                                  <label class="form-label">{{ current_locale=='fa' and 'نام شرکت' or _('Company Name') }}</label>
+                                  <input type="text" name="company_other_name" value="{{ company_other_name or '' }}" class="form-control rounded-3" placeholder="{{ current_locale=='fa' and 'نام شرکت را وارد کنید' or _('Enter company name') }}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                    <div class="card-header"><h5><i class="bi bi-list-check me-2"></i>{{ _('Agenda Items') }}</h5></div>
+                    <div class="card-body">
+                        <div id="agenda-items-container">
+                            {% if form.agenda_items|length == 0 %}
+                                <div class="agenda-item input-group mb-2">
+                                    <input type="text" name="agenda_items-0" id="agenda_items-0" class="form-control rounded-3" placeholder="{{ current_locale=='fa' and 'دستور جلسه را وارد کنید' or _('Enter agenda item') }}">
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-agenda-item" aria-label="{{ _('Remove Agenda Item') }}"><i class="bi bi-trash3-fill"></i></button>
+                                </div>
+                            {% endif %}
+                            {% for item_field in form.agenda_items %}
+                                 <div class="agenda-item input-group mb-2">
+                                    {{ item_field(class="form-control rounded-3", placeholder=(current_locale=='fa' and 'دستور جلسه را وارد کنید' or _('Enter agenda item'))) }}
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-agenda-item" aria-label="{{ _('Remove Agenda Item') }}"><i class="bi bi-trash3-fill"></i></button>
+                                    {% if item_field.errors %}<div class="invalid-feedback d-block"><span>[{{ _(item_field.errors[0]) }}]</span></div>{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-agenda-item" class="btn btn-secondary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i>{{ current_locale=='fa' and 'افزودن دستور جلسه' or _('Add Agenda Item') }}</button>
+                    </div>
+                </div>
+
+                <div class="card mb-3 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                    <div class="card-header"><h5><i class="bi bi-pencil-square me-2"></i>{{ _('Minutes') }}</h5></div>
+                    <div class="card-body">
+                        <textarea id="minutesEditor" name="minutes" class="form-control rounded-3" rows="8" placeholder="{{ current_locale=='fa' and 'صورت جلسه را اینجا بنویسید...' or _('Record the meeting minutes here...') }}">{{ form.minutes.data or '' }}</textarea>
+                        {% if form.minutes.errors %}<div class="invalid-feedback d-block">{{ _(form.minutes.errors[0]) }}</div>{% endif %}
+                    </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-4">
+                <div class="card mb-3 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                    <div class="card-header"><h5><i class="bi bi-people-fill me-2"></i>{{ _('Attendees') }}</h5></div>
+                    <div class="card-body">
+                        <div id="attendees-container">
+                            {% if form.attendees|length == 0 %}
+                                <div class="attendee-item input-group mb-2">
+                                    <input type="text" name="attendees-0" id="attendees-0" class="form-control rounded-3" placeholder="{{ current_locale=='fa' and 'نام شرکت‌کننده را وارد کنید' or _('Enter attendee name') }}">
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-attendee-item" aria-label="{{ _('Remove Attendee') }}"><i class="bi bi-trash3-fill"></i></button>
+                                </div>
+                            {% endif %}
+                            {% for attendee_field in form.attendees %}
+                                <div class="attendee-item input-group mb-2">
+                                    {{ attendee_field(class="form-control rounded-3", placeholder=(current_locale=='fa' and 'نام شرکت‌کننده را وارد کنید' or _('Enter attendee name'))) }}
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-attendee-item" aria-label="{{ _('Remove Attendee') }}"><i class="bi bi-trash3-fill"></i></button>
+                                    {% if attendee_field.errors %}<div class="invalid-feedback d-block"><span>[{{ _(attendee_field.errors[0]) }}]</span></div>{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-attendee-button" class="btn btn-secondary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i>{{ current_locale=='fa' and 'افزودن شرکت‌کننده' or _('Add Attendee') }}</button>
+                    </div>
+                </div>
+
+                <div class="card mb-3 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                    <div class="card-header"><h5><i class="bi bi-check2-square me-2"></i>{{ _('Action Items') }}</h5></div>
+                    <div class="card-body">
+                        <div id="action-items-container">
+                            {% if form.action_items|length == 0 %}
+                                <div class="action-item-group border p-3 mb-3 rounded-3 bg-light">
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ current_locale=='fa' and 'توضیح' or _('Description') }}</label>
+                                        <textarea class="form-control rounded-3" rows="2" placeholder="{{ current_locale=='fa' and 'توضیح اقدام...' or _('Action description...') }}" name="action_items-0-description" id="action_items-0-description"></textarea>
+                                    </div>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12">
+                                            <label class="form-label">{{ current_locale=='fa' and 'مسئول' or _('Assigned To') }}</label>
+                                            <select class="form-select rounded-3 assignee-select" name="action_items-0-assigned_to" id="action_items-0-assigned_to" data-current="">
+                                                <option value="">{{ current_locale=='fa' and 'انتخاب کنید' or _('Select') }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">{{ current_locale=='fa' and 'مهلت' or _('Deadline') }}</label>
+                                            <div class="input-group">
+                                              <input type="date" class="form-control rounded-3" name="action_items-0-deadline" id="action_items-0-deadline" autocomplete="off" />
+                                              <button type="button" class="btn btn-outline-secondary jdp-open rounded-3" onclick="this.previousElementSibling.showPicker && this.previousElementSibling.showPicker();"><i class="bi bi-calendar-event"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-end">
+                                            <button type="button" class="btn btn-danger btn-sm ms-auto remove-action-item" title="{{ current_locale=='fa' and 'حذف' or _('Remove') }}"><i class="bi bi-trash3-fill"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% for action_entry in form.action_items %}
+                                <div class="action-item-group border p-3 mb-3 rounded-3 bg-light">
+                                    <div class="mb-2">
+                                        <label for="{{ action_entry.form.description.id }}" class="form-label">{{ current_locale=='fa' and 'توضیح' or _('Description') }}</label>
+                                        {{ action_entry.form.description(class="form-control rounded-3", rows="2", placeholder=(current_locale=='fa' and 'توضیح اقدام...' or _('Action description...'))) }}
+                                        {% if action_entry.form.description.errors %}<div class="invalid-feedback d-block">{{ _(action_entry.form.description.errors[0]) }}</div>{% endif %}
+                                    </div>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12">
+                                            <label for="{{ action_entry.form.assigned_to.id }}" class="form-label">{{ current_locale=='fa' and 'مسئول' or _('Assigned To') }}</label>
+                                            <select class="form-select rounded-3 assignee-select" name="{{ action_entry.form.assigned_to.name }}" id="{{ action_entry.form.assigned_to.id }}" data-current="{{ action_entry.form.assigned_to.data or '' }}">
+                                                <option value="">{{ current_locale=='fa' and 'انتخاب کنید' or _('Select') }}</option>
+                                            </select>
+                                            {% if action_entry.form.assigned_to.errors %}<div class="invalid-feedback d-block">{{ _(action_entry.form.assigned_to.errors[0]) }}</div>{% endif %}
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="{{ action_entry.form.deadline.id }}" class="form-label">{{ current_locale=='fa' and 'مهلت' or _('Deadline') }}</label>
+                                            <div class="input-group">
+                                              {{ action_entry.form.deadline(class="form-control rounded-3", type='date') }}
+                                              <button type="button" class="btn btn-outline-secondary jdp-open rounded-3" onclick="this.previousElementSibling.showPicker && this.previousElementSibling.showPicker();"><i class="bi bi-calendar-event"></i></button>
+                                            </div>
+                                            {% if action_entry.form.deadline.errors %}<div class="invalid-feedback d-block">{{ _(action_entry.form.deadline.errors[0]) }}</div>{% endif %}
+                                        </div>
+                                        <div class="col-12 d-flex align-items-end">
+                                            <button type="button" class="btn btn-danger btn-sm ms-auto remove-action-item" title="{{ current_locale=='fa' and 'حذف' or _('Remove') }}"><i class="bi bi-trash3-fill"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-action-item-button" class="btn btn-secondary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i>{{ current_locale=='fa' and 'افزودن مورد اقدام' or _('Add Action Item') }}</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+        </fieldset>
+
+        <div class="mt-4 mb-4 position-sticky bottom-0 pt-3" style="z-index: 5;">
+             <div class="d-flex justify-content-center">
+               <button type="submit" class="btn btn-primary rounded-3" style="width: min(480px, 50%);"><i class="bi bi-save me-2"></i>{{ _('Save Meeting') }}</button>
+             </div>
+        </div>
+    </form>
+
+    <p class="mt-3"><a href="{{ url_for('index') }}" class="btn btn-link text-secondary"><i class="bi bi-arrow-left-circle me-1"></i>{{ _('Back to Home') }}</a></p>
+
+{% endblock %}

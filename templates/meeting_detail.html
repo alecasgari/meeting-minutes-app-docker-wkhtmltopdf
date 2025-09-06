@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% block title %}{{ meeting.title }}{% endblock %} {# Title comes from DB #}
+
+{% block content %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light pb-2">
+             <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start">
+                 
+                 <div class="order-2 order-md-1 flex-grow-1 me-md-3 mb-2 mb-md-0">
+                     <h4 class="mb-1"><i class="bi bi-file-earmark-text me-2"></i>{{ meeting.title }}</h4>
+                     {% if meeting.company %}
+                         {# Translate Company label #}
+                         <div class="text-muted small mt-1 mb-1"><i class="bi bi-building me-1"></i>{{ _('Company:') }} {{ meeting.company_other_name or meeting.company }}</div>
+                     {% endif %}
+                 </div>
+                 <div class="order-md-2 d-none d-md-block text-end">
+                     {% if logo_filename %}
+                     <div class="card shadow-sm d-inline-block" style="width: 140px; background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                         <div class="card-body p-2 d-flex align-items-center justify-content-center" style="height:110px;">
+                             <img src="{{ url_for('static', filename='images/' + logo_filename) }}" alt="{{ meeting.company or _('Logo') }}" class="img-fluid" style="max-height:100%; max-width:100%;">
+                         </div>
+                     </div>
+                     {% endif %}
+                 </div>
+             </div>
+             <div class="d-block d-md-none mt-2 text-center border-top pt-2">
+                 {% if logo_filename %}
+                 <div class="card shadow-sm mx-auto" style="max-width: 180px; background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                     <div class="card-body p-2 d-flex align-items-center justify-content-center" style="height:100px;">
+                         <img src="{{ url_for('static', filename='images/' + logo_filename) }}" alt="{{ meeting.company or _('Logo') }}" class="img-fluid" style="max-height:100%; max-width:100%;">
+                     </div>
+                 </div>
+                 {% endif %}
+             </div>
+
+             <div class="order-1 order-md-3 text-md-end mb-2 mb-md-0 ms-md-auto">
+                {# Translate Date label #}
+                <span class="badge bg-secondary rounded-pill">{{ _('Date:') }} {{ meeting.meeting_date.strftime('%Y-%m-%d') }}</span>
+                {% if meeting_date_jalali %}
+                <span class="badge bg-dark rounded-pill ms-1">{{ current_locale=='fa' and 'تاریخ (شمسی):' or 'Date (Jalali):' }} {{ meeting_date_jalali }}</span>
+                {% endif %}
+            </div>
+            
+        </div>
+        <div class="card-body small text-muted pt-2 d-flex align-items-center gap-2">
+             {# Translate labels #}
+             {% set author_avatar = meeting.author.avatar_path and url_for('static', filename='images/' + meeting.author.avatar_path) or url_for('static', filename='images/default_avatar.png') %}
+             <img src="{{ author_avatar }}" alt="avatar" style="height:22px;width:22px;border-radius:50%;object-fit:cover;border:1px solid rgba(0,0,0,.08)">
+             <span>{{ _('Recorded By:') }} {{ meeting.author.display_name or meeting.author.username }}</span>
+             <span class="mx-1">|</span>
+             <span>{{ _('Date Recorded:') }} {{ meeting.date_posted.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div id="action-items-card" class="card mb-4 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                <div class="card-header">
+                    {# Translate title #}
+                    <h5><i class="bi bi-list-check me-2"></i>{{ _('Agenda') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="show-while-loading mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-line" style="width:120px"></div>
+                            <div class="skeleton-line" style="width:70px"></div>
+                        </div>
+                    </div>
+                    {% if agenda_list %}
+                         <ul class="list-group list-group-flush">
+                            {% for item in agenda_list %}
+                                <li class="list-group-item py-1">{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-0">{{ _('N/A') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if meeting.minutes %}
+            <div class="card mb-4 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                 <div class="card-header">
+                      {# Translate title #}
+                     <h5><i class="bi bi-pencil-square me-2"></i>{{ _('Minutes') }}</h5>
+                 </div>
+                <div class="card-body">
+                     <div class="minutes-content p-2 bg-light rounded border small">
+                         {{ meeting.minutes.replace('\n', '<br>') | safe }}
+                     </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card mb-4 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                <div class="card-header">
+                    {# Translate title #}
+                    <h5><i class="bi bi-people-fill me-2"></i>{{ _('Attendees') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if attendees_list %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for person in attendees_list %}
+                                <span class="badge rounded-pill text-bg-light border">{{ person }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-0">{{ _('N/A') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-4 shadow-sm" style="background:#f6f7f9; border:1px solid rgba(0,0,0,.06);">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0"><i class="bi bi-check2-square me-2"></i>{{ _('Action Items') }}</h5>
+                    <div class="d-flex align-items-center gap-2 small flex-wrap">
+                        <span class="badge text-bg-secondary"><span class="lbl">{{ (current_locale=='fa' and 'همه' or _('All')) }}</span> <span id="count-total">{{ (pnum(total_actions) if current_locale=='fa' else total_actions) }}</span></span>
+                        <span class="badge text-bg-success"><span class="lbl">{{ (current_locale=='fa' and 'انجام‌شده' or _('Done')) }}</span> <span id="count-done">{{ (pnum(done_actions) if current_locale=='fa' else done_actions) }}</span></span>
+                        <span class="badge text-bg-danger"><span class="lbl">{{ (current_locale=='fa' and 'عقب‌افتاده' or _('Overdue')) }}</span> <span id="count-overdue">{{ (pnum(overdue_actions) if current_locale=='fa' else overdue_actions) }}</span></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="filters">
+                            <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="all">{{ current_locale=='fa' and 'همه' or _('All') }}</button>
+                            <button type="button" class="btn btn-outline-success filter-btn" data-filter="done">{{ current_locale=='fa' and 'انجام‌شده' or _('Done') }}</button>
+                            <button type="button" class="btn btn-outline-danger filter-btn" data-filter="overdue">{{ current_locale=='fa' and 'مهلت‌گذشته' or _('Overdue') }}</button>
+                            <button type="button" class="btn btn-outline-primary filter-btn" data-filter="open">{{ current_locale=='fa' and 'باز' or _('Open') }}</button>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-2 small">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="select-all-actions">
+                            <label class="form-check-label" for="select-all-actions">{{ current_locale=='fa' and 'انتخاب همه' or _('Select All') }}</label>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-outline-success btn-sm" id="bulk-done" title="{{ current_locale=='fa' and 'علامت انجام' or _('Mark Done') }}"><i class="bi bi-check2"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="bulk-undo" title="{{ current_locale=='fa' and 'بازگردانی' or _('Undo') }}"><i class="bi bi-arrow-counterclockwise"></i></button>
+                        </div>
+                    </div>
+                    {% if action_items_list %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover small" id="actions-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width:34px"></th>
+                                        <th scope="col">{{ _('Description') }}</th>
+                                        <th scope="col">{{ _('Assigned To') }}</th>
+                                        <th scope="col">{{ _('Deadline') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in action_items_list %}
+                                        {% set is_done = item.get('is_done') or (item.get('status','')|string|lower in ['done','closed','completed','true','1']) %}
+                                        <tr data-idx="{{ loop.index0 }}" data-url="{{ url_for('toggle_action_done', meeting_id=meeting.id, item_index=loop.index0) }}" class="{{ is_done and 'table-success' or '' }}">
+                                            <td>
+                                                <input class="form-check-input mark-done-toggle" type="checkbox" {{ 'checked' if is_done else '' }} data-idx="{{ loop.index0 }}" onchange="window.__toggleAction && window.__toggleAction(this)">
+                                            </td>
+                                            <td>{{ item.get('description', '') }}</td>
+                                            <td>{{ item.get('assigned_to', '') }}</td>
+                                            <td class="{{ (not is_done and item.get('deadline') and item.get('deadline') < meeting.meeting_date.strftime('%Y-%m-%d')) and 'text-danger' or '' }}">{{ item.get('deadline', '') }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <script>
+                        (function() {
+                          function initActionCard() {
+                            const card = document.getElementById('action-items-card');
+                            if (!card) return;
+                            // Fallback global handler
+                            window.__toggleAction = async function(el){
+                              const row = el.closest('tr');
+                              const url = row && row.getAttribute('data-url');
+                              try {
+                                const res = await fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' }, credentials: 'same-origin', body: '{}' });
+                                if (!res.ok) throw new Error('http ' + res.status);
+                                const data = await res.json();
+                                if (!data.ok) throw new Error('failed');
+                                if (data.is_done) { row.classList.add('table-success'); }
+                                else { row.classList.remove('table-success'); }
+                                const counters = data.counters || {};
+                                const totalEl = card.querySelector('#count-total');
+                                const doneEl = card.querySelector('#count-done');
+                                const overdueEl = card.querySelector('#count-overdue');
+                                if (totalEl) totalEl.textContent = (typeof counters.total !== 'undefined') ? counters.total : '';
+                                if (doneEl) doneEl.textContent = (typeof counters.done !== 'undefined') ? counters.done : '';
+                                if (overdueEl) overdueEl.textContent = (typeof counters.overdue !== 'undefined') ? counters.overdue : '';
+                              } catch(err){
+                                el.checked = !el.checked;
+                                alert('{{ "خطا در به‌روزرسانی وضعیت" if current_locale=="fa" else "Failed to update status" }}');
+                              }
+                            }
+                            async function handleToggle(e) {
+                              const target = e.target;
+                              if (!target.classList.contains('mark-done-toggle')) return;
+                              const idx = target.getAttribute('data-idx');
+                              try {
+                                const row = target.closest('tr');
+                                const url = row && row.getAttribute('data-url');
+                                if (!url) throw new Error('no-url');
+                                const res = await fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' }, credentials: 'same-origin', body: '{}' });
+                                if (!res.ok) throw new Error('http ' + res.status);
+                                const data = await res.json();
+                                if (!data.ok) throw new Error('failed');
+                                if (data.is_done) { row.classList.add('table-success'); }
+                                else { row.classList.remove('table-success'); }
+                                const counters = data.counters || {};
+                                const totalEl = card.querySelector('#count-total');
+                                const doneEl = card.querySelector('#count-done');
+                                const overdueEl = card.querySelector('#count-overdue');
+                                if (totalEl) totalEl.textContent = (typeof counters.total !== 'undefined') ? counters.total : '';
+                                if (doneEl) doneEl.textContent = (typeof counters.done !== 'undefined') ? counters.done : '';
+                                if (overdueEl) overdueEl.textContent = (typeof counters.overdue !== 'undefined') ? counters.overdue : '';
+                              } catch (err) {
+                                target.checked = !target.checked; // revert
+                                alert('{{ "خطا در به‌روزرسانی وضعیت" if current_locale=="fa" else "Failed to update status" }}');
+                              }
+                            }
+                            card.addEventListener('change', handleToggle);
+                            card.addEventListener('click', handleToggle);
+
+                            // Select all
+                            const selectAll = document.getElementById('select-all-actions');
+                            const table = document.getElementById('actions-table');
+                            if (selectAll && table) {
+                              selectAll.addEventListener('change', () => {
+                                table.querySelectorAll('.mark-done-toggle').forEach(cb => { cb.checked = selectAll.checked; });
+                              });
+                            }
+
+                            async function bulkUpdate(doneFlag) {
+                              const rows = Array.from(table.querySelectorAll('tbody tr'));
+                              const indices = rows
+                                  .filter(r => r.querySelector('.mark-done-toggle')?.checked)
+                                  .map(r => parseInt(r.getAttribute('data-idx')))
+                                  .filter(n => !isNaN(n));
+                              if (indices.length === 0) return;
+                              try {
+                                const url = '{{ url_for('bulk_update_actions', meeting_id=meeting.id) }}';
+                                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', body: JSON.stringify({ indices: indices, done: doneFlag }) });
+                                if (!res.ok) throw new Error('http ' + res.status);
+                                const data = await res.json();
+                                if (!data.ok) throw new Error('failed');
+                                // update UI rows
+                                rows.forEach(r => {
+                                  const cb = r.querySelector('.mark-done-toggle');
+                                  if (cb && cb.checked) {
+                                    if (doneFlag) r.classList.add('table-success'); else r.classList.remove('table-success');
+                                  }
+                                });
+                                const counters = data.counters || {};
+                                const totalEl = card.querySelector('#count-total');
+                                const doneEl = card.querySelector('#count-done');
+                                const overdueEl = card.querySelector('#count-overdue');
+                                if (totalEl) totalEl.textContent = (typeof counters.total !== 'undefined') ? counters.total : '';
+                                if (doneEl) doneEl.textContent = (typeof counters.done !== 'undefined') ? counters.done : '';
+                                if (overdueEl) overdueEl.textContent = (typeof counters.overdue !== 'undefined') ? counters.overdue : '';
+                              } catch(err) {
+                                alert('{{ "خطا در بروزرسانی گروهی" if current_locale=="fa" else "Bulk update failed" }}');
+                              }
+                            }
+
+                            const bulkDone = document.getElementById('bulk-done');
+                            const bulkUndo = document.getElementById('bulk-undo');
+                            if (bulkDone) bulkDone.addEventListener('click', () => bulkUpdate(true));
+                            if (bulkUndo) bulkUndo.addEventListener('click', () => bulkUpdate(false));
+
+                            // Row filter buttons
+                            function isRowDone(row){ return row.classList.contains('table-success'); }
+                            function isRowOverdue(row){ return row.querySelector('td:last-child')?.classList.contains('text-danger'); }
+                            function applyFilter(kind){
+                              const rows = Array.from(table.querySelectorAll('tbody tr'));
+                              rows.forEach(r => { r.style.display = ''; });
+                              if (kind === 'all') return;
+                              rows.forEach(r => {
+                                const done = isRowDone(r); const overdue = isRowOverdue(r);
+                                const open = !done;
+                                let show = true;
+                                if (kind==='done') show = done;
+                                else if (kind==='overdue') show = overdue && !done;
+                                else if (kind==='open') show = open;
+                                r.style.display = show ? '' : 'none';
+                              });
+                            }
+                            card.querySelectorAll('.filter-btn').forEach(b => {
+                              b.addEventListener('click', () => applyFilter(b.getAttribute('data-filter')));
+                            });
+                          }
+                          if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', initActionCard);
+                          } else {
+                            initActionCard();
+                          }
+                        })();
+                        </script>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-0">{{ _('N/A') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm sticky-bottom" style="z-index: 100;">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-md-between gap-2">
+            <div class="d-flex flex-column flex-md-row gap-2 mb-2 mb-md-0">
+                 {# Translate button texts #}
+                <a href="{{ url_for('generate_meeting_pdf', meeting_id=meeting.id) }}" class="btn btn-info btn-sm">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>{{ _('Generate PDF') }}
+                </a>
+                <a href="{{ url_for('edit_meeting', meeting_id=meeting.id) }}" class="btn btn-warning btn-sm">
+                     <i class="bi bi-pencil-square me-1"></i>{{ _('Edit Meeting') }}
+                </a>
+                <form method="POST" action="{{ url_for('delete_meeting', meeting_id=meeting.id) }}" class="d-grid d-md-inline">
+                    <button type="submit" class="btn btn-danger btn-sm"
+                           onclick="return confirm('{{ _('Are you sure you want to delete this meeting? This cannot be undone.') }}');"> {# Translate confirm message #}
+                           <i class="bi bi-trash3 me-1"></i>{{ _('Delete Meeting') }}
+                    </button>
+                </form>
+            </div>
+            <div class="d-grid d-md-inline-block">
+                 {# Translate button text #}
+                <a href="{{ url_for('meetings_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left-circle me-1"></i>{{ _('Back to My Meetings') }}</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

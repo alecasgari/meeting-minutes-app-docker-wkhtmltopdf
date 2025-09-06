@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.env
+.venv
+venv/
+
+# Flask/Build
+instance/
+dist/
+build/
+
+# SQLite DB (keep DB out of VCS; deploy will create/migrate)
+site.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# User uploads (kept on persistent volumes in prod)
+static/images/custom/
+static/images/avatars/
+
+# Pyppeteer cache
+.pyppeteer/
+# Python cache
+__pycache__/
+*.pyc
+
+# Database file (optional, but usually good practice)
+site.db
+
+# Environment variables file (if you use one later)
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Virtual environment (if you create one locally later)
+venv/
+env/
+*.venv

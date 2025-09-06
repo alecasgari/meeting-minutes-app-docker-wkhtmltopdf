@@ -1,0 +1,147 @@
+/* PDF styles tuned for wkhtmltopdf */
+:root {
+  --primary: #FFD54F;
+  --ink: #111;
+  --muted: #666;
+  --surface: #fff;
+  --surface-2: #f6f7f9;
+  --radius: 16px;
+}
+
+html[dir="rtl"] body { direction: rtl; }
+
+body.pdf-body {
+  color: var(--ink);
+  font-size: 12px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  margin: 0;
+  padding: 0 4mm 6mm 4mm;
+}
+
+.pdf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10mm 0 6mm 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(255,213,79,.22), rgba(255,213,79,0) 70%);
+}
+
+.brand-row { margin-bottom: 2mm; }
+.brand-chip {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid #eee;
+  padding: 2mm 4mm;
+  border-radius: 999px;
+  font-size: 10px;
+}
+
+.title {
+  margin: 0 0 3mm 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+.meta { color: var(--muted); }
+.logo-card {
+  background: var(--surface);
+  border: 1px solid #eef0f3;
+  border-radius: 6px;
+  padding: 3mm;
+  min-width: 30mm;
+  min-height: 15mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-card.placeholder { color: #aaa; font-size: 10px; }
+.logo { height: 15mm; max-width: 30mm; object-fit: contain; display: block; }
+
+.stats-row { display: flex; gap: 4mm; margin-top: 4mm; }
+html[dir="rtl"] .stats-row { justify-content: flex-start; }
+.stat-pill {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 16mm;
+  background: var(--surface);
+  border: 1px solid #eee;
+  border-radius: 999px;
+  padding: 1mm 5mm;
+  min-width: 16mm;
+  min-height: 7mm;
+}
+.stat-pill .lbl { color: var(--muted); font-size: 11px; }
+.stat-pill .badge-count {
+  position: absolute;
+  top: -3mm;
+  right: -3mm; /* default LTR */
+  background: var(--primary);
+  color: #222;
+  border-radius: 999px;
+  min-width: 5mm;
+  height: 5mm;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 8px;
+  border: 1px solid rgba(0,0,0,.05);
+}
+html[dir="rtl"] .stat-pill .badge-count { right: auto; left: -3mm; }
+
+.grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 5mm; }
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 5mm;
+  border: 1px solid #eef0f3;
+  margin-bottom: 5mm;
+}
+
+.section-title { font-size: 14px; font-weight: 700; margin: 0 0 4mm 0; }
+.section-title-row { display:flex; align-items:center; justify-content: space-between; }
+.badge-pill { background: var(--primary); color:#222; padding: 1mm 4mm; border-radius: 999px; font-weight:700; }
+
+.chips { display:flex; flex-wrap:wrap; gap: 4mm 4mm; }
+.chip { background: var(--surface-2); border:1px solid #eee; padding: 1.5mm 3.5mm; border-radius: 999px; }
+
+.list { margin: 0; padding-inline-start: 5mm; }
+.list.numbered { list-style: decimal; }
+.list.numbered.manual { padding: 0; }
+.list.numbered.manual .list-item { display: flex; align-items: baseline; gap: 2mm; margin: 1.8mm 0; }
+.list.numbered.manual .list-item .num { font-weight: 700; color: #333; }
+html[dir="rtl"] .list.numbered.manual { padding: 0 5mm 0 0; }
+html[dir="rtl"] .list.numbered.manual .list-item { justify-content: flex-start; text-align: right; }
+html[dir="ltr"] .list.numbered.manual { padding: 0 0 0 5mm; }
+html[dir="ltr"] .list.numbered.manual .list-item { justify-content: flex-start; text-align: left; }
+
+.table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; }
+.table thead th {
+  text-align: start;
+  background: var(--surface-2);
+  padding: 3mm;
+  border-bottom: 1px solid #e5e7eb;
+}
+.table-actions thead th:first-child { border-top-left-radius: 8px; }
+.table-actions thead th:last-child { border-top-right-radius: 8px; }
+.table tbody td { padding: 3mm; border-bottom: 1px solid #f0f2f5; }
+
+.paragraphs p { margin: 0 0 2.5mm 0; line-height: 1.6; }
+.note { background: #fffdf2; border: 1px solid #f3e8b0; border-radius: 12px; padding: 4mm; }
+html[dir="rtl"] .paragraphs, html[dir="rtl"] .note { text-align: right; }
+
+.pdf-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  border-top: 1px solid #e5e7eb;
+  padding-top: 5mm;
+  margin-top: 8mm;
+}
+.sep { opacity: .5; }
+
+/* RTL tuning */
+html[dir="rtl"] .list { padding-inline-start: 0; padding-inline-end: 5mm; }

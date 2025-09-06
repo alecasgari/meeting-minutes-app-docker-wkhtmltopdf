@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Settings') }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header">
+    {% set active_tab = request.args.get('tab', 'general') %}
+    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {{ 'active' if active_tab=='general' else '' }}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="{{ 'true' if active_tab=='general' else 'false' }}">{{ _('General') if current_locale!='fa' else 'تنظیمات اصلی' }}</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {{ 'active' if active_tab=='account' else '' }}" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button" role="tab" aria-controls="account" aria-selected="{{ 'true' if active_tab=='account' else 'false' }}">{{ current_locale=='fa' and 'حساب کاربری' or _('Account') }}</button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="tab-content">
+      <div class="tab-pane fade {{ 'show active' if active_tab=='general' else '' }}" id="general" role="tabpanel" aria-labelledby="general-tab">
+        {% if current_locale=='fa' %}
+        <form method="post" class="row g-3 align-items-end">
+          <input type="hidden" name="section" value="fonts">
+          <div class="col-12 col-md-6">
+            <label class="form-label">{{ 'فونت رابط کاربری (فارسی)' }}</label>
+            <select class="form-select" name="ui_font_fa">
+              {% for f in available_fa_fonts %}
+              <option value="{{ f.id }}" {% if f.id==ui_font_fa %}selected{% endif %}>{{ f.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-3 d-grid">
+            <button class="btn btn-primary" type="submit">{{ 'ذخیره' }}</button>
+          </div>
+        </form>
+        {% else %}
+        <form method="post" class="row g-3 align-items-end">
+          <input type="hidden" name="section" value="fonts">
+          <div class="col-12 col-md-6">
+            <label class="form-label">{{ _('UI Font (English)') }}</label>
+            <select class="form-select" name="ui_font_en">
+              {% for fam in available_en_fonts %}
+              <option value="{{ fam }}" {% if fam==ui_font_en %}selected{% endif %}>{{ fam }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">{{ _('Loaded via Google Fonts, no local download needed.') }}</div>
+          </div>
+          <div class="col-12 col-md-3 d-grid">
+            <button class="btn btn-primary" type="submit">{{ _('Save') }}</button>
+          </div>
+        </form>
+        {% endif %}
+
+        <hr class="my-4" />
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">{{ current_locale=='fa' and 'حالت رنگ' or _('Color mode') }}</label>
+            <div>
+              <button type="button" class="btn btn-outline-secondary me-1" data-theme-set="light">{{ current_locale=='fa' and 'روشن' or 'Light' }}</button>
+              <button type="button" class="btn btn-outline-secondary me-1" data-theme-set="dark">{{ current_locale=='fa' and 'تیره' or 'Dark' }}</button>
+              <button type="button" class="btn btn-outline-secondary" data-theme-set="auto">{{ current_locale=='fa' and 'خودکار' or 'Auto' }}</button>
+            </div>
+            <div class="form-text">{{ current_locale=='fa' and 'می‌توانید تم را از اینجا تغییر دهید' or 'You can change theme mode here.' }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade {{ 'show active' if active_tab=='account' else '' }}" id="account" role="tabpanel" aria-labelledby="account-tab">
+        <div class="row g-3 align-items-end">
+          <form method="post" class="row g-2 align-items-end">
+            <input type="hidden" name="section" value="profile">
+            <div class="col-12 col-md-4">
+              <label class="form-label">{{ current_locale=='fa' and 'نام نمایشی' or _('Display name') }}</label>
+              <input type="text" class="form-control form-control-sm" name="display_name" value="{{ current_user.display_name or '' }}" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label">{{ _('Email') if current_locale!='fa' else 'ایمیل' }}</label>
+              <input type="email" class="form-control form-control-sm" name="email" value="{{ current_user.email or '' }}" />
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+              <button class="btn btn-primary btn-sm" type="submit">{{ current_locale=='fa' and 'ذخیره' or _('Save') }}</button>
+            </div>
+          </form>
+          <form method="post" enctype="multipart/form-data" class="row g-2 align-items-end mt-1">
+            <input type="hidden" name="section" value="avatar">
+            <div class="col-12 col-md-6">
+              <label class="form-label">{{ current_locale=='fa' and 'آواتار' or _('Avatar') }}</label>
+              <input type="file" class="form-control form-control-sm" name="avatar" accept="image/*" />
+            </div>
+            <div class="col-6 col-md-2 d-grid">
+              <button class="btn btn-secondary btn-sm" type="submit">{{ current_locale=='fa' and 'آپلود' or _('Upload') }}</button>
+            </div>
+            <div class="col-6 col-md-4">
+              {% if current_user.avatar_path %}
+              <img src="{{ url_for('static', filename='images/' + current_user.avatar_path) }}" alt="avatar" style="height:44px; width:44px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,0,0,.08);" />
+              {% else %}
+              <span class="text-muted small">{{ current_locale=='fa' and 'بدون آواتار' or _('No avatar') }}</span>
+              {% endif %}
+            </div>
+          </form>
+          <form method="post" class="row g-2 align-items-end mt-1">
+            <input type="hidden" name="section" value="password">
+            <div class="col-12 col-md-3">
+              <label class="form-label">{{ current_locale=='fa' and 'رمز فعلی' or _('Current Password') }}</label>
+              <input type="password" class="form-control form-control-sm" name="current_password" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label">{{ current_locale=='fa' and 'رمز جدید' or _('New Password') }}</label>
+              <input type="password" class="form-control form-control-sm" name="new_password" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label">{{ current_locale=='fa' and 'تکرار رمز' or _('Confirm Password') }}</label>
+              <input type="password" class="form-control form-control-sm" name="confirm_password" />
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+              <button class="btn btn-warning btn-sm" type="submit">{{ current_locale=='fa' and 'تغییر رمز' or _('Change Password') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('[data-theme-set]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-theme-set');
+        let to = mode;
+        if (mode==='auto') {
+          to = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', to);
+        try { localStorage.setItem('mm_theme', to);} catch(e) {}
+      });
+    });
+  });
+</script>
+{% endblock %}

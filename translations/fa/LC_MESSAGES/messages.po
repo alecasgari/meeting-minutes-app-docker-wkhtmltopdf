@@ -1,0 +1,403 @@
+# Persian translations for Meeting Minutes App.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the Meeting Minutes App
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Meeting Minutes App 1.0\n"
+"Report-Msgid-Bugs-To: your.email@example.com\n"
+"POT-Creation-Date: 2025-05-05 15:46+0400\n"
+"PO-Revision-Date: 2025-05-09 10:19+0400\n"
+"Last-Translator: \n"
+"Language-Team: fa <LL@li.org>\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.17.0\n"
+"X-Generator: Poedit 3.6\n"
+
+#: app.py:168 templates/base.html:153 templates/index.html:3
+msgid "Home"
+msgstr "خانه"
+
+#: app.py:174
+msgid "Language changed successfully."
+msgstr "زبان با موفقیت تغییر کرد."
+
+#: app.py:176
+msgid "Invalid language selected."
+msgstr "زبان نامعتبری انتخاب شد."
+
+#: app.py:188
+#, python-format
+msgid "Account created for %(username)s! You can now log in."
+msgstr "حساب کاربری برای %(username)s ایجاد شد! اکنون می‌توانید وارد شوید."
+
+#: app.py:190 templates/base.html:183 templates/index.html:23
+msgid "Register"
+msgstr "ثبت نام"
+
+#: app.py:201
+msgid "Login Successful!"
+msgstr "ورود موفقیت‌ آمیز بود!"
+
+#: app.py:203
+msgid "Login Unsuccessful. Please check username and password"
+msgstr "ورود ناموفق. لطفاً نام کاربری و رمز عبور را بررسی کنید"
+
+#: app.py:204 templates/base.html:179 templates/index.html:22
+#: templates/login.html:2 templates/login.html:6 templates/login.html:35
+msgid "Login"
+msgstr "ورود"
+
+#: app.py:210
+msgid "You have been logged out."
+msgstr "شما از حساب کاربری خود خارج شدید."
+
+#: app.py:227
+msgid "Your meeting has been created!"
+msgstr "جلسه شما با موفقیت ایجاد شد!"
+
+#: app.py:230 templates/base.html:157 templates/meetings.html:8
+msgid "New Meeting"
+msgstr "جلسه جدید"
+
+#: app.py:250 templates/base.html:160 templates/meetings.html:2
+#: templates/meetings.html:6
+msgid "My Meetings"
+msgstr "جلسات من"
+
+#: app.py:293
+msgid "Your meeting has been updated!"
+msgstr "جلسه شما با موفقیت به‌روز شد!"
+
+#: app.py:316 templates/meeting_detail.html:134
+msgid "Edit Meeting"
+msgstr "ویرایش جلسه"
+
+#: app.py:325
+msgid "Your meeting has been deleted!"
+msgstr "جلسه شما با موفقیت حذف شد!"
+
+#: app.py:393 templates/create_meeting.html:100
+#: templates/meeting_detail.html:103
+msgid "Description"
+msgstr "شرح"
+
+#: app.py:393 templates/create_meeting.html:107
+#: templates/meeting_detail.html:104
+msgid "Assigned To"
+msgstr "مسئول"
+
+#: app.py:393 templates/create_meeting.html:113
+#: templates/meeting_detail.html:105
+msgid "Deadline"
+msgstr "مهلت"
+
+#: app.py:414 app.py:420
+msgid "  N/A"
+msgstr "  نامشخص"
+
+#: app.py:423
+msgid "Date"
+msgstr "تاریخ"
+
+#: app.py:424 templates/create_meeting.html:35
+msgid "Company"
+msgstr "شرکت"
+
+#: app.py:425
+msgid "Recorded By"
+msgstr "ثبت توسط"
+
+#: templates/base.html:9
+msgid "Meeting Minutes"
+msgstr "صورتجلسات"
+
+#: templates/base.html:146
+msgid "MeetingMinutes"
+msgstr "نرم افزار صورتجلسات"
+
+#: templates/base.html:147
+msgid "Toggle navigation"
+msgstr "تغییر وضعیت ناوبری"
+
+#: templates/base.html:170
+#, python-format
+msgid "Welcome, %(username)s!"
+msgstr "خوش آمدید، %(username)s!"
+
+#: templates/base.html:174
+msgid "Logout"
+msgstr "خروج"
+
+#: templates/base.html:222
+msgid "Meeting Minutes App"
+msgstr "برنامه صورتجلسات شما"
+
+#: templates/create_meeting.html:13
+msgid "Meeting Details"
+msgstr "مشاهده جزئیات"
+
+#: templates/create_meeting.html:18
+msgid "Title"
+msgstr "عنوان"
+
+#: templates/create_meeting.html:19
+msgid "Enter the meeting title"
+msgstr "عنوان جلسه را وارد کنید."
+
+#: templates/create_meeting.html:27
+msgid "Meeting Date"
+msgstr "تاریخ جلسه"
+
+# #-#-#-#-#  catalog.po (Meeting Minutes App 1.0)  #-#-#-#-#
+# Manually added entry
+#: templates/create_meeting.html:46 templates/meeting_detail.html:42
+msgid "Attendees"
+msgstr "شرکت‌کنندگان"
+
+#: templates/create_meeting.html:52
+msgid "Enter attendee name"
+msgstr "نام شرکت کننده را وارد کنید"
+
+# #-#-#-#-#  catalog.po (Meeting Minutes App 1.0)  #-#-#-#-#
+# Manually added entry
+#: templates/create_meeting.html:53
+msgid "Remove Attendee"
+msgstr "حذف شرکت کننده"
+
+# #-#-#-#-#  catalog.po (Meeting Minutes App 1.0)  #-#-#-#-#
+# Manually added entry
+#: templates/create_meeting.html:58
+msgid "Add Attendee"
+msgstr "اضافه کردن شرکت‌کننده"
+
+# Manually added entry
+#: templates/create_meeting.html:64
+msgid "Agenda Items"
+msgstr "دستور جلسه"
+
+#: templates/create_meeting.html:70
+msgid "Enter agenda item"
+msgstr "دستور جلسه را وارد کنید"
+
+#: templates/create_meeting.html:71
+msgid "Remove Agenda Item"
+msgstr "حذف دستور جلسه"
+
+#: templates/create_meeting.html:76
+msgid "Add Agenda Item"
+msgstr "اضافه کردن دستور جلسه"
+
+#: templates/create_meeting.html:82 templates/meeting_detail.html:81
+msgid "Minutes"
+msgstr "صورتجلسه"
+
+#: templates/create_meeting.html:85
+msgid "Record the meeting minutes here..."
+msgstr "صورتجلسات را اینجا ثبت کنید."
+
+#: templates/create_meeting.html:92 templates/meeting_detail.html:94
+msgid "Action Items"
+msgstr "موارد اقدام"
+
+#: templates/create_meeting.html:101
+msgid "Action description..."
+msgstr "شرح اقدام."
+
+#: templates/create_meeting.html:108
+msgid "Assigned to..."
+msgstr "مسئول."
+
+#: templates/create_meeting.html:118
+msgid "Remove"
+msgstr "حذف"
+
+#: templates/create_meeting.html:124
+msgid "Add Action Item"
+msgstr "اضافه کردن موارد اقدام"
+
+# Manually added entry
+#: templates/create_meeting.html:132
+msgid "Save Meeting"
+msgstr "ذخیره جلسه"
+
+#: templates/create_meeting.html:136 templates/login.html:44
+msgid "Back to Home"
+msgstr "بازگشت به خانه"
+
+#: templates/index.html:10
+msgid "Meeting Minutes Made Easy"
+msgstr "ساخت آسان صورت جلسات"
+
+#: templates/index.html:12
+msgid "Welcome! Record, manage, and access your meeting minutes efficiently."
+msgstr "خوش آمدید! همه صورتجلسات خود را ثبت و به صورت کارآمد، مدیریت کنید."
+
+#: templates/index.html:16
+msgid "Create New Meeting"
+msgstr "جلسه جدید"
+
+#: templates/index.html:19
+msgid "View My Meetings"
+msgstr "جلسات من"
+
+#: templates/index.html:35
+msgid "Your Stats"
+msgstr "آمار شما"
+
+#: templates/index.html:37
+msgid "Total Meetings Recorded"
+msgstr "مجموع جلسات ثبت شده"
+
+#: templates/login.html:11
+msgid "Username"
+msgstr "نام کاربری"
+
+#: templates/login.html:20
+msgid "Password"
+msgstr "رمز عبور"
+
+#: templates/login.html:31
+msgid "Remember Me"
+msgstr "مرا به خاطر بسپار"
+
+#: templates/login.html:40
+msgid "Need an account?"
+msgstr "حساب کاربری ندارید؟"
+
+#: templates/login.html:40
+msgid "Register here"
+msgstr "اینجا ثبت نام کنید"
+
+#: templates/meeting_detail.html:10
+msgid "Date:"
+msgstr "تاریخ:"
+
+#: templates/meeting_detail.html:16
+msgid "Company:"
+msgstr "شرکت:"
+
+#: templates/meeting_detail.html:22 templates/meeting_detail.html:29
+#: templates/meetings.html:20
+msgid "Logo"
+msgstr "لوگو"
+
+#: templates/meeting_detail.html:35
+msgid "Recorded By:"
+msgstr "ثبت توسط:"
+
+#: templates/meeting_detail.html:35
+msgid "Date Recorded:"
+msgstr "تاریخ ثبت:"
+
+#: templates/meeting_detail.html:53 templates/meeting_detail.html:72
+#: templates/meeting_detail.html:121
+msgid "N/A"
+msgstr "نامشخص"
+
+#: templates/meeting_detail.html:61
+msgid "Agenda"
+msgstr "دستور جلسه"
+
+#: templates/meeting_detail.html:131
+msgid "Generate PDF"
+msgstr "تولید PDF"
+
+#: templates/meeting_detail.html:138
+msgid "Are you sure you want to delete this meeting? This cannot be undone."
+msgstr "آیا از حذف این جلسه مطمئن هستید؟ این عمل قابل بازگشت نیست."
+
+#: templates/meeting_detail.html:139
+msgid "Delete Meeting"
+msgstr "حذف جلسه"
+
+#: templates/meeting_detail.html:145
+msgid "Back to My Meetings"
+msgstr "جلسات من"
+
+#: templates/meetings.html:24
+msgid "General"
+msgstr "عمومی"
+
+#: templates/meetings.html:35
+msgid "Recorded:"
+msgstr "ثبت شده:"
+
+#: templates/meetings.html:39
+msgid "View Details"
+msgstr "مشاهده جزئیات"
+
+#: templates/meetings.html:49
+msgid "You haven't recorded any meetings yet."
+msgstr "شما هنوز هیچ جلسه‌ای ثبت نکرده‌اید."
+
+#: templates/meetings.html:49
+msgid "Create one now!"
+msgstr "یکی جدید بسازید!"
+
+msgid "Close"
+msgstr "بستن"
+
+msgid "Confirm Password"
+msgstr "تایید رمز عبور"
+
+msgid "Sign Up"
+msgstr "ثبت نام"
+
+msgid "Already have an account?"
+msgstr "قبلاً حساب کاربری ساخته‌اید؟"
+
+msgid "Log In"
+msgstr "ورود"
+
+# === Manually Added Entries (From Form Definitions) ===
+# Manually added entry
+msgid "That username is already taken. Please choose a different one."
+msgstr "این نام کاربری قبلا گرفته شده است. لطفا نام دیگری انتخاب کنید."
+
+# Manually added entry
+msgid "-- Select Company --"
+msgstr "-- انتخاب شرکت --"
+
+# Manually added entry
+msgid "Rabe Al Mustaqbal"
+msgstr "ربیع المستقبل"
+
+# Manually added entry
+msgid "Rahkar Gasht"
+msgstr "راهکار گشت"
+
+# Manually added entry
+msgid "EazyMig"
+msgstr "ایزی میگ"
+
+# Manually added entry
+msgid "Abu Dhabi"
+msgstr "هلدینگ ابوظبی"
+
+# Manually added entry
+msgid "Other"
+msgstr "شرکت دیگر"
+
+# Manually added entry
+msgid "Attendee"
+msgstr "شرکت‌کننده"
+
+# Manually added entry
+msgid "Agenda Item"
+msgstr "مورد دستور جلسه"
+
+msgid "Welcome to the Meeting Minutes App!"
+msgstr "به برنامه سازنده صورت جلسه رایگان خوش آمدید!"
+
+msgid "This application helps you record and manage your meeting notes."
+msgstr "این برنامه به شما در ثبت و مدیریت یادداشت‌های جلسات کمک می‌کند."
+
+msgid "New user?"
+msgstr "کاربر جدید؟"
