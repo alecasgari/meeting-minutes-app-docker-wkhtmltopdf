@@ -1,0 +1,35 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PUPPETEER_CACHE_DIR=/var/cache/pyppeteer
+
+# System deps for Chromium/pyppeteer and fonts
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl wget fonts-liberation \
+    libasound2 libatk1.0-0 libcairo2 libgbm1 libgtk-3-0 \
+    libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
+    libxdamage1 libxext6 libxfixes3 libxrandr2 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Cache dir for pyppeteer Chromium
+RUN mkdir -p /var/cache/pyppeteer && useradd -ms /bin/bash appuser
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app
+
+# Persistent data dir for sqlite/uploads
+RUN mkdir -p /data && chown -R appuser:appuser /app /data /var/cache/pyppeteer
+USER appuser
+
+EXPOSE 8000
+
+# Gunicorn server (threads for I/O, longer timeout for PDF generation)
+CMD gunicorn app:app -b 0.0.0.0:8000 --workers 3 --threads 2 --timeout 120
+
+

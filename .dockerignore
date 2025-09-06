@@ -1,0 +1,16 @@
+.git
+.gitignore
+Dockerfile
+README.md
+node_modules
+venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+pytest_cache
+site.db
+static/images/custom/
+static/images/avatars/
+/data
