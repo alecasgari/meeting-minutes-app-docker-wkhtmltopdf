@@ -24,3 +24,4 @@ Flask-Babel
 arabic_reshaper
 python-bidi
 pyppeteer==1.0.2
+gunicorn==21.2.0
