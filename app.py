@@ -41,7 +41,7 @@ app = Flask(__name__)
 # --- App Configuration ---
 app.config['SECRET_KEY'] = 'a_very_secret_key_for_development_12345'
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///' + os.path.join(basedir, 'site.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'images', 'custom')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -1090,6 +1090,10 @@ def generate_meeting_pdf(meeting_id):
                 '--disable-gpu',
                 '--no-zygote',
                 '--disable-setuid-sandbox',
+                '--single-process',
+                '--disable-software-rasterizer',
+                '--no-first-run',
+                '--no-default-browser-check',
             ],
             handleSIGINT=False,
             handleSIGTERM=False,
