@@ -39,7 +39,7 @@ from bidi.algorithm import get_display
 app = Flask(__name__)
 
 # --- App Configuration ---
-app.config['SECRET_KEY'] = 'a_very_secret_key_for_development_12345'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_very_secret_key_for_development_12345')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///' + os.path.join(basedir, 'site.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -254,7 +254,7 @@ class User(db.Model, UserMixin):
     display_name = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(120), nullable=True)
     avatar_path = db.Column(db.String(255), nullable=True)
-    meetings = db.relationship('Meeting', backref='author', lazy=True)
+    meetings = db.relationship('Meeting', back_populates='user', lazy=True)
     def __repr__(self): return f"User('{self.username}')"
 
 @login_manager.user_loader
@@ -279,6 +279,10 @@ class Meeting(db.Model):
     company = db.Column(db.String(100), nullable=True)
     company_logo = db.Column(db.String(255), nullable=True)
     company_other_name = db.Column(db.String(120), nullable=True)
+    
+    # Relationship
+    user = db.relationship('User', back_populates='meetings')
+    
     def __repr__(self): return f"Meeting('{self.title}', '{self.meeting_date}', Company: '{self.company}')"
 
 # === Form Definitions (Using _l directly inside class definitions) ===
@@ -339,7 +343,7 @@ def index():
     total_actions = 0
     overdue_actions = 0
     if current_user.is_authenticated:
-        user_meetings = Meeting.query.filter_by(author=current_user).order_by(Meeting.meeting_date.desc()).all()
+        user_meetings = Meeting.query.filter_by(user=current_user).order_by(Meeting.meeting_date.desc()).all()
         meeting_count = len(user_meetings)
         recent_meetings = user_meetings[:5]
         today = datetime.date.today()
@@ -432,7 +436,7 @@ def new_meeting():
                     save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                     file.save(save_path)
                     uploaded_logo_relpath = f"custom/{unique_name}"
-        meeting = Meeting(title=form.title.data, meeting_date=form.meeting_date.data, attendees=attendees_json_string, agenda=agenda_json_string, minutes=form.minutes.data, action_items=action_items_json_string, company=form.company.data, company_logo=uploaded_logo_relpath, company_other_name=request.form.get('company_other_name') or None, author=current_user)
+        meeting = Meeting(title=form.title.data, meeting_date=form.meeting_date.data, attendees=attendees_json_string, agenda=agenda_json_string, minutes=form.minutes.data, action_items=action_items_json_string, company=form.company.data, company_logo=uploaded_logo_relpath, company_other_name=request.form.get('company_other_name') or None, user=current_user)
         db.session.add(meeting); db.session.commit()
         flash(_('Your meeting has been created!'), 'success')
         return redirect(url_for('meetings_list'))
@@ -450,7 +454,7 @@ def meetings_list():
     date_to = request.args.get('date_to', type=str)
     status = request.args.get('status', default='', type=str).strip().lower()
 
-    query = Meeting.query.filter_by(author=current_user)
+    query = Meeting.query.filter_by(user=current_user)
 
     if q:
         like = f"%{q}%"
@@ -484,7 +488,7 @@ def meetings_list():
         if getattr(meeting, 'company_logo', None):
             logo_filename = meeting.company_logo
         else:
-        logo_filename = logo_mapping.get(company_name, default_logo_filename)
+            logo_filename = logo_mapping.get(company_name, default_logo_filename)
         if not logo_filename:
             logo_filename = default_logo_filename
         logo_path_check = os.path.join(basedir, 'static', 'images', logo_filename)
@@ -617,7 +621,7 @@ def settings():
 @login_required
 def meeting_detail(meeting_id):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user: abort(403)
+    if meeting.user != current_user: abort(403)
     try: agenda_list = json.loads(meeting.agenda or '[]')
     except: agenda_list = []
     try: attendees_list = json.loads(meeting.attendees or '[]')
@@ -666,7 +670,7 @@ def meeting_detail(meeting_id):
 @login_required
 def toggle_action_done(meeting_id, item_index):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user:
+    if meeting.user != current_user:
         abort(403)
     try:
         items = json.loads(meeting.action_items or '[]')
@@ -705,7 +709,7 @@ def toggle_action_done(meeting_id, item_index):
 @login_required
 def bulk_update_actions(meeting_id: int):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user:
+    if meeting.user != current_user:
         abort(403)
     try:
         payload = request.get_json(silent=True) or {}
@@ -756,7 +760,7 @@ def bulk_update_actions(meeting_id: int):
 @login_required
 def edit_meeting(meeting_id):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user: abort(403)
+    if meeting.user != current_user: abort(403)
     form = MeetingForm()
     if form.validate_on_submit():
         # ... (POST logic) ...
@@ -810,7 +814,7 @@ def edit_meeting(meeting_id):
 @login_required
 def delete_meeting(meeting_id):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user: abort(403)
+    if meeting.user != current_user: abort(403)
     db.session.delete(meeting)
     db.session.commit()
     flash(_('Your meeting has been deleted!'), 'success')
@@ -919,17 +923,14 @@ class MyPDF(FPDF):
         self.set_font('Vazirmatn', '', 8)
         self.cell(0, 4, shape_text(f'Page {self.page_no()}/{{nb}}'), align='R') # Use shape_text
 
-# --- Updated generate_meeting_pdf Function (Pyppeteer HTML->PDF) ---
-# This assumes 'app' is the Flask app instance and is available in this scope
-# Also assumes 'Meeting', 'db', 'basedir', '_' are defined/imported
-import asyncio
-from pyppeteer import launch
-from pyppeteer import chromium_downloader as cd
+# --- Updated generate_meeting_pdf Function (wkhtmltopdf HTML->PDF) ---
+import subprocess
+import tempfile
 @app.route("/meeting/<int:meeting_id>/pdf")
 @login_required
 def generate_meeting_pdf(meeting_id):
     meeting = Meeting.query.get_or_404(meeting_id)
-    if meeting.author != current_user:
+    if meeting.user != current_user:
         abort(403)
 
     # Prepare lists from JSON fields
@@ -943,6 +944,15 @@ def generate_meeting_pdf(meeting_id):
         attendees_list = []
     try:
         action_items_list = json.loads(meeting.action_items or '[]')
+        # Convert deadline strings to date objects
+        for item in action_items_list:
+            if 'deadline' in item and isinstance(item['deadline'], str):
+                try:
+                    item['deadline'] = datetime.date.fromisoformat(item['deadline'])
+                except (ValueError, TypeError):
+                    item['deadline'] = None
+            elif 'deadline' not in item or not item['deadline']:
+                item['deadline'] = None
     except Exception:
         action_items_list = []
 
@@ -1035,6 +1045,12 @@ def generate_meeting_pdf(meeting_id):
         if os.path.exists(css_fs_path):
             with open(css_fs_path, 'r', encoding='utf-8') as f:
                 css_text = f.read()
+        
+        # Also read main.css for additional styles
+        main_css_path = os.path.join(basedir, 'static', 'css', 'main.css')
+        if os.path.exists(main_css_path):
+            with open(main_css_path, 'r', encoding='utf-8') as f:
+                css_text += "\n" + f.read()
     except Exception:
         css_text = None
 
@@ -1067,51 +1083,95 @@ def generate_meeting_pdf(meeting_id):
         css_text=css_text,
     )
 
-    async def render_pdf(content: str) -> bytes:
-        executable_path = None
+    def render_pdf_with_wkhtmltopdf(html_content: str) -> bytes:
+        """Generate PDF using wkhtmltopdf"""
         try:
-            # Prefer pre-downloaded Chromium (respects PYPPETEER_HOME if set)
-            path = cd.chromium_executable()
-            if path and os.path.exists(path):
-                executable_path = path
-                else:
-                # Download on-demand as a fallback
-                await cd.download_chromium()
-                path2 = cd.chromium_executable()
-                if path2 and os.path.exists(path2):
-                    executable_path = path2
-        except Exception:
-            executable_path = None
+            # Create temporary files
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as html_file:
+                html_file.write(html_content)
+                html_path = html_file.name
+            
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as pdf_file:
+                pdf_path = pdf_file.name
+            
+            # wkhtmltopdf command - try different possible paths
+            possible_paths = [
+                'wkhtmltopdf',  # if in PATH
+                r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
+                r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
+                r'C:\wkhtmltopdf\bin\wkhtmltopdf.exe'
+            ]
+            
+            wkhtmltopdf_path = None
+            for path in possible_paths:
+                if path == 'wkhtmltopdf':
+                    # Check if it's in PATH
+                    try:
+                        subprocess.run([path, '--version'], capture_output=True, check=True, timeout=5)
+                        wkhtmltopdf_path = path
+                        break
+                    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+                        continue
+                elif os.path.exists(path):
+                    wkhtmltopdf_path = path
+                    break
+            
+            if not wkhtmltopdf_path:
+                raise Exception("wkhtmltopdf not found. Please install it from https://wkhtmltopdf.org/downloads.html")
+            
+            # Debug: print the path being used
+            print(f"Using wkhtmltopdf path: {wkhtmltopdf_path}")
+            
+            cmd = [
+                wkhtmltopdf_path,
+                '--page-size', 'A4',
+                '--margin-top', '0mm',
+                '--margin-bottom', '0mm', 
+                '--margin-left', '0mm',
+                '--margin-right', '0mm',
+                '--encoding', 'UTF-8',
+                '--print-media-type',
+                '--enable-local-file-access',
+                '--disable-smart-shrinking',
+                '--load-error-handling', 'ignore',
+                '--load-media-error-handling', 'ignore',
+                '--disable-external-links',
+                '--disable-forms',
+                '--disable-plugins',
+                '--disable-javascript',
+                html_path,
+                pdf_path
+            ]
+            
+            # Run wkhtmltopdf
+            print(f"Running command: {cmd}")  # Debug
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode != 0:
+                raise Exception(f"wkhtmltopdf failed: {result.stderr}")
+            
+            # Read PDF bytes
+            with open(pdf_path, 'rb') as f:
+                pdf_bytes = f.read()
+            
+            # Cleanup
+            os.unlink(html_path)
+            os.unlink(pdf_path)
+            
+            return pdf_bytes
+            
+        except Exception as e:
+            # Cleanup on error
+            try:
+                if 'html_path' in locals():
+                    os.unlink(html_path)
+                if 'pdf_path' in locals():
+                    os.unlink(pdf_path)
+            except:
+                pass
+            raise Exception(f"PDF generation failed: {str(e)}")
 
-        launch_kwargs = dict(
-            args=[
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--no-zygote',
-                '--disable-setuid-sandbox',
-                '--single-process',
-                '--disable-software-rasterizer',
-                '--no-first-run',
-                '--no-default-browser-check',
-            ],
-            handleSIGINT=False,
-            handleSIGTERM=False,
-            handleSIGHUP=False,
-            headless=True,
-        )
-        if executable_path:
-            launch_kwargs['executablePath'] = executable_path
-
-        browser = await launch(**launch_kwargs)
-        page = await browser.newPage()
-        await page.setContent(content)
-        await page.waitForSelector('body')
-        pdf_bytes = await page.pdf(format='A4', margin={'top': '5mm', 'bottom': '6mm', 'left': '5mm', 'right': '5mm'}, printBackground=True)
-        await browser.close()
-        return pdf_bytes
-
-    pdf_bytes = asyncio.run(render_pdf(html))
+    pdf_bytes = render_pdf_with_wkhtmltopdf(html)
 
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
@@ -1121,4 +1181,6 @@ def generate_meeting_pdf(meeting_id):
 
 # === Main Execution Block ===
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

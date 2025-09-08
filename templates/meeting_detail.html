@@ -44,9 +44,9 @@
         </div>
         <div class="card-body small text-muted pt-2 d-flex align-items-center gap-2">
              {# Translate labels #}
-             {% set author_avatar = meeting.author.avatar_path and url_for('static', filename='images/' + meeting.author.avatar_path) or url_for('static', filename='images/default_avatar.png') %}
+             {% set author_avatar = meeting.user.avatar_path and url_for('static', filename='images/' + meeting.user.avatar_path) or url_for('static', filename='images/default_avatar.png') %}
              <img src="{{ author_avatar }}" alt="avatar" style="height:22px;width:22px;border-radius:50%;object-fit:cover;border:1px solid rgba(0,0,0,.08)">
-             <span>{{ _('Recorded By:') }} {{ meeting.author.display_name or meeting.author.username }}</span>
+             <span>{{ _('Recorded By:') }} {{ meeting.user.display_name or meeting.user.username }}</span>
              <span class="mx-1">|</span>
              <span>{{ _('Date Recorded:') }} {{ meeting.date_posted.strftime('%Y-%m-%d %H:%M') }}</span>
         </div>
