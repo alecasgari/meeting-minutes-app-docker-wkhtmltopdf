@@ -2,20 +2,25 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PUPPETEER_CACHE_DIR=/var/cache/pyppeteer \
+    PYPPETEER_HOME=/var/cache/pyppeteer
 
-# System deps for wkhtmltopdf and fonts
+# System deps for Chromium/pyppeteer and fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget fonts-liberation \
-    wkhtmltopdf \
+    libasound2 libatk1.0-0 libcairo2 libgbm1 libgtk-3-0 \
+    libnss3 libnspr4 libdbus-1-3 \
+    libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libxshmfence1 libxi6 libxss1 libxkbcommon0 \
+    libcups2 libdrm2 libpangocairo-1.0-0 libpango-1.0-0 \
+    libglib2.0-0 libgdk-pixbuf-2.0-0 libatk-bridge2.0-0 libatspi2.0-0 \
     fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
-    fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Create app user
-RUN useradd -ms /bin/bash appuser
+# Cache dir for pyppeteer Chromium
+RUN mkdir -p /var/cache/pyppeteer && useradd -ms /bin/bash appuser
 
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
@@ -23,8 +28,26 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 
 # Persistent data dir for sqlite/uploads
-RUN mkdir -p /data && chown -R appuser:appuser /app /data
+RUN mkdir -p /data && chown -R appuser:appuser /app /data /var/cache/pyppeteer
 USER appuser
+
+# Pre-download Chromium for pyppeteer at build-time to avoid runtime fetch
+RUN python - <<'PY'
+import asyncio, sys
+from pyppeteer import chromium_downloader as cd
+
+async def main():
+    try:
+        ok = cd.check_chromium()
+        if not ok:
+            path = await cd.download_chromium()
+            print('Downloaded Chromium to:', path)
+        print('Chromium executable:', cd.chromium_executable())
+    except Exception as e:
+        print('WARN: Chromium predownload failed:', e, file=sys.stderr)
+
+asyncio.run(main())
+PY
 
 EXPOSE 8000
 

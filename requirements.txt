@@ -20,7 +20,8 @@ SQLAlchemy==2.0.40
 typing_extensions==4.13.1
 Werkzeug==3.1.3
 WTForms==3.2.1
-Flask-Babel==4.0.0
-arabic_reshaper==3.0.0
-python-bidi==0.4.2
+Flask-Babel
+arabic_reshaper
+python-bidi
+pyppeteer==1.0.2
 gunicorn==21.2.0

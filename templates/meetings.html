@@ -132,7 +132,7 @@
       </div>
     </div>
     <div class="alert alert-info mt-2 app-ready" role="alert">
-      {{ _('You haven\'t recorded any meetings yet.') }} <a href="{{ url_for('new_meeting') }}" class="alert-link">{{ _('Create one now!') }}</a>
+      {% trans %}You haven't recorded any meetings yet.{% endtrans %} <a href="{{ url_for('new_meeting') }}" class="alert-link">{% trans %}Create one now!{% endtrans %}</a>
     </div>
     {% endif %}
 

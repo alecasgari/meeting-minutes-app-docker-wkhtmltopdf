@@ -4,187 +4,159 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
-    {% if css_text %}
-    <style>
-        {{ css_text }}
-    </style>
+    {% if css_file_url %}
+    <link rel="stylesheet" href="{{ css_file_url }}">
     {% endif %}
-    
     <style>
-        /* Font loading for PDF */
+        {% if pdf_font_regular_url %}
         @font-face {
-            font-family: 'Vazirmatn';
+            font-family: 'PDFAppFont';
             src: url('{{ pdf_font_regular_url }}') format('{{ pdf_font_regular_format or 'truetype' }}');
             font-weight: 400;
             font-style: normal;
             font-display: swap;
         }
+        {% endif %}
+        {% if pdf_font_bold_url %}
         @font-face {
-            font-family: 'Vazirmatn';
+            font-family: 'PDFAppFont';
             src: url('{{ pdf_font_bold_url }}') format('{{ pdf_font_bold_format or 'truetype' }}');
             font-weight: 700;
             font-style: normal;
             font-display: swap;
         }
-        
-        /* Fallback fonts */
-        body {
-            font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif;
-        }
+        {% endif %}
+        body { font-family: '{{ pdf_font_family or 'PDFAppFont' }}', sans-serif; }
+        {{ css_text|safe if css_text }}
     </style>
     <title>{{ meeting.title }}</title>
 </head>
 <body class="pdf-body">
-    <!-- Header Section -->
     <header class="pdf-header">
-        <div class="header-content">
-            <div class="header-left">
-                <h1 class="meeting-title">{{ meeting.title }}</h1>
-                
-                <div class="meeting-meta">
-                    <div class="meta-item">
-                        <div class="meta-icon"></div>
-                        <span>{{ _('Date') }}: {{ date_jalali if lang == 'fa' else meeting.date.strftime('%Y-%m-%d') }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-icon"></div>
-                        <span>{{ _('Company') }}: {{ company_display }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-icon"></div>
-                        <span>{{ _('Created by') }}: {{ meeting.user.username if meeting.user else 'Unknown' }}</span>
-                    </div>
-                </div>
-                
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-number">{{ (pnum(attendees_list|length) if pnum else attendees_list|length) }}</span>
-                        <span class="stat-label">{{ _('Participants') }}</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">{{ (pnum(agenda_list|length) if pnum else agenda_list|length) }}</span>
-                        <span class="stat-label">{{ _('Agenda Items') }}</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">{{ (pnum(action_items_list|length) if pnum else action_items_list|length) }}</span>
-                        <span class="stat-label">{{ _('Action Items') }}</span>
-                    </div>
-                </div>
+        <div class="header-left">
+            <div class="brand-row">
+                <div class="meta">
+                    <span> {{ lang=='fa' and ' میلادی' or 'Gregorian' }}: {{ (pnum(meeting.meeting_date.strftime('%Y-%m-%d')) if pnum else meeting.meeting_date.strftime('%Y-%m-%d')) }}</span>
+                    {% if date_jalali %}
+                    <span> • {{ lang=='fa' and ' شمسی' or 'Jalali' }}: {{ (pnum(date_jalali) if pnum else date_jalali) }}</span>
+                    {% endif %}
+                </div>            
             </div>
-            
-            <div class="header-right">
-                {% if logo_url %}
-                <div class="logo-container">
-                    <img src="{{ logo_url }}" alt="Logo" class="logo">
-                </div>
+            <h1 class="title">{{ meeting.title }}</h1>
+            <div class="meta">
+               {% if company_display or meeting.company_other_name %}
+                <span> 🏢 {{ _('Company') }}: {{ meeting.company_other_name or company_display }}</span>
+                {% endif %}
+                <span> • 👤 {{ _('Recorded By') }}: {{ meeting.author.display_name or meeting.author.username }}</span>
+            </div>
+            <div class="stats-row">
+                {% if lang == 'fa' %}
+                <div class="stat-pill"><span class="badge-count">{{ (pnum(attendees_list|length) if pnum else attendees_list|length) }}</span><span class="lbl">تعداد شرکت کنندگان</span></div>
+                <div class="stat-pill"><span class="badge-count">{{ (pnum(agenda_list|length) if pnum else agenda_list|length) }}</span><span class="lbl">تعداد دستور جلسه</span></div>
+                <div class="stat-pill"><span class="badge-count">{{ (pnum(action_items_list|length) if pnum else action_items_list|length) }}</span><span class="lbl">موارد اقدام</span></div>
+                {% else %}
+                <div class="stat-pill"><span class="badge-count">{{ attendees_list|length }}</span><span class="lbl">Attendees</span></div>
+                <div class="stat-pill"><span class="badge-count">{{ agenda_list|length }}</span><span class="lbl">Agenda</span></div>
+                <div class="stat-pill"><span class="badge-count">{{ action_items_list|length }}</span><span class="lbl">Action Items</span></div>
                 {% endif %}
             </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="pdf-content">
-        <div class="content-grid">
-            <!-- Participants Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">{{ _('Participants') }}</h2>
-                    <span class="card-badge">{{ attendees_list|length }}</span>
-                </div>
-                <div class="participants-grid">
-                    {% for attendee in attendees_list %}
-                    <div class="participant-card">
-                        <div class="participant-avatar">
-                            {{ attendee[0] if attendee[0] else '?' }}
-                        </div>
-                        <p class="participant-name">{{ attendee }}</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Agenda Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">{{ _('Agenda') }}</h2>
-                    <span class="card-badge">{{ agenda_list|length }}</span>
-                </div>
-                <ol class="agenda-list">
-                    {% for item in agenda_list %}
-                    <li class="agenda-item">
-                        <div class="agenda-number">{{ loop.index }}</div>
-                        <div class="agenda-text">{{ item }}</div>
-                    </li>
-                    {% endfor %}
-                </ol>
+        {% if logo_url %}
+        <div class="header-right">
+            <div class="brand-chip">{{ 'صورت جلسه و توضیحات' if lang == 'fa' else 'Meeting Minutes' }}</div>
+            <div class="logo-card">
+                <img src="{{ logo_url }}" alt="logo" class="logo" />
             </div>
         </div>
-
-        <!-- Meeting Minutes Card (Full Width) -->
-        <div class="card full-width-card">
-            <div class="card-header">
-                <h2 class="card-title">{{ _('Meeting Minutes') }}</h2>
-            </div>
-            <div class="minutes-content">
-                <p class="minutes-text">{{ meeting.minutes or _('No minutes recorded.') }}</p>
-            </div>
-        </div>
-
-        <!-- Action Items Card (Full Width) -->
-        {% if action_items_list %}
-        <div class="card full-width-card">
-            <div class="card-header">
-                <h2 class="card-title">{{ _('Action Items') }}</h2>
-                <span class="card-badge">{{ action_items_list|length }}</span>
-            </div>
-            <table class="action-table">
-                <thead>
-                    <tr>
-                        <th>{{ _('Description') }}</th>
-                        <th>{{ _('Responsible') }}</th>
-                        <th>{{ _('Deadline') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in action_items_list %}
-                    <tr>
-                        <td>{{ item.description if item.description else _('No description') }}</td>
-                        <td>{{ item.responsible if item.responsible else _('Not assigned') }}</td>
-                        <td>
-                            {% if item.deadline %}
-                                {% if item.deadline is string %}
-                                    {{ item.deadline }}
-                                {% else %}
-                                    {{ item.deadline.strftime('%Y-%m-%d') }}
-                                {% endif %}
-                            {% else %}
-                                {{ _('No deadline') }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% else %}
+        <div class="header-right">
+            <div class="logo-card placeholder">logo</div>
+            
         </div>
         {% endif %}
-    </main>
+    </header>
 
-    <!-- Footer -->
-    <footer class="pdf-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <span>{{ _('Generated by Meeting Minutes App') }}</span>
-                <span>•</span>
-                <span>{{ meeting.user.username if meeting.user else 'Unknown' }}</span>
-                <span>•</span>
-                <span>{{ meeting.date.strftime('%Y-%m-%d') if meeting.date else 'Unknown' }}</span>
+    <section class="grid-two">
+        <div class="card">
+            <h2 class="section-title">{{ _('Attendees') }}</h2>
+            {% if attendees_list %}
+            <div class="chips">
+                {% for person in attendees_list %}
+                <span class="chip">👤 {{ person }}</span>
+                {% endfor %}
             </div>
-            <div class="footer-right">
-                <span>{{ _('Page') }} 1</span>
-            </div>
+            {% else %}
+            <p class="muted">{{ _('N/A') }}</p>
+            {% endif %}
         </div>
+        <div class="card">
+            <h2 class="section-title">{{ _('Agenda') }}</h2>
+            {% if agenda_list %}
+            <div class="list numbered manual">
+                {% for item in agenda_list %}
+                <div class="list-item"><span class="num">{{ (pnum(loop.index) if pnum else loop.index) }}.</span> {{ item }}</div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="muted">{{ _('N/A') }}</p>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if meeting.minutes %}
+    <section class="card">
+        <h2 class="section-title">{{ _('Minutes') }}</h2>
+        <div class="paragraphs note">
+            {% for line in meeting.minutes.splitlines() %}
+            <p>{{ (pnum(line) if pnum else line) }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="card">
+        <div class="section-title-row">
+            <h2 class="section-title">{{ _('Action Items') }}</h2>
+            <div class="badge-pill">{{ (pnum(action_items_list|length) if pnum else action_items_list|length) }}</div>
+        </div>
+        {% if action_items_list %}
+        <table class="table table-actions">
+            <thead>
+                <tr>
+                    <th>{{ _('Description') }}</th>
+                    <th>{{ _('Assigned To') }}</th>
+                    <th>{{ _('Deadline') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for it in action_items_list %}
+                <tr>
+                    <td>{{ it.get('description', '') }}</td>
+                    <td>{{ it.get('assigned_to', '') }}</td>
+                    <td>{{ (pnum(it.get('deadline', '')) if pnum else it.get('deadline','')) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="muted">{{ _('N/A') }}</p>
+        {% endif %}
+    </section>
+
+    <footer class="pdf-footer">
+        {% if lang == 'fa' %}
+        <span>تولید شده توسط نرم افزار صورت جلسه</span>
+        <span class="sep">|</span>
+        <span>الک عسگری</span>
+        <span class="sep">|</span>
+        <span>alecasgari.com</span>
+        <span class="sep">|</span>
+        <span>تولید شده در: {{ (pnum(meeting.date_posted.strftime('%Y-%m-%d %H:%M')) if pnum else meeting.date_posted.strftime('%Y-%m-%d %H:%M')) }}</span>
+        {% else %}
+        <span>Generated by Meeting Minutes</span>
+        <span class="sep">•</span>
+        <span>{{ meeting.date_posted.strftime('%Y-%m-%d %H:%M') }}</span>
+        {% endif %}
     </footer>
 </body>
 </html>
