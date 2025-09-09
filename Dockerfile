@@ -3,15 +3,14 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PUPPETEER_CACHE_DIR=/var/cache/pyppeteer \
-    PYPPETEER_HOME=/var/cache/pyppeteer
+    PUPPETEER_CACHE_DIR=/var/cache/pyppeteer
 
 # System deps for Chromium/pyppeteer and fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget fonts-liberation \
     libasound2 libatk1.0-0 libcairo2 libgbm1 libgtk-3-0 \
     libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libxshmfence1 libxi6 libxss1 libxkbcommon0 \
-    libcups2 libdrm2 libpangocairo-1.0-0 libpango-1.0-0 \
+    libcups2 libdrm2 libpangocairo-1.0-0 libpango-1.0-0 libxkbcommon0 \
     fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
  && rm -rf /var/lib/apt/lists/*
 
@@ -36,11 +35,9 @@ from pyppeteer import chromium_downloader as cd
 
 async def main():
     try:
-        ok = cd.check_chromium()
-        if not ok:
-            path = await cd.download_chromium()
-            print('Downloaded Chromium to:', path)
-        print('Chromium executable:', cd.chromium_executable())
+        if not cd.check_chromium():
+            await cd.download_chromium()
+        print('Chromium:', cd.chromium_executable())
     except Exception as e:
         print('WARN: Chromium predownload failed:', e, file=sys.stderr)
 

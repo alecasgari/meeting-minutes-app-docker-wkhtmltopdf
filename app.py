@@ -924,7 +924,6 @@ class MyPDF(FPDF):
 # Also assumes 'Meeting', 'db', 'basedir', '_' are defined/imported
 import asyncio
 from pyppeteer import launch
-from pyppeteer import chromium_downloader as cd
 @app.route("/meeting/<int:meeting_id>/pdf")
 @login_required
 def generate_meeting_pdf(meeting_id):
@@ -1068,38 +1067,13 @@ def generate_meeting_pdf(meeting_id):
     )
 
     async def render_pdf(content: str) -> bytes:
-        executable_path = None
-        try:
-            # Prefer pre-downloaded Chromium (respects PYPPETEER_HOME if set)
-            path = cd.chromium_executable()
-            if path and os.path.exists(path):
-                executable_path = path
-            else:
-                # Download on-demand as a fallback
-                await cd.download_chromium()
-                path2 = cd.chromium_executable()
-                if path2 and os.path.exists(path2):
-                    executable_path = path2
-        except Exception:
-            executable_path = None
-
-        launch_kwargs = dict(
-            args=[
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--no-zygote',
-                '--disable-setuid-sandbox',
-            ],
+        browser = await launch(
+            args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--no-zygote'],
             handleSIGINT=False,
             handleSIGTERM=False,
             handleSIGHUP=False,
-            headless=True,
+            headless=True
         )
-        if executable_path:
-            launch_kwargs['executablePath'] = executable_path
-
-        browser = await launch(**launch_kwargs)
         page = await browser.newPage()
         await page.setContent(content)
         await page.waitForSelector('body')
