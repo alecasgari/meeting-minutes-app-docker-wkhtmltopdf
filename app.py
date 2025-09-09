@@ -484,7 +484,7 @@ def meetings_list():
         if getattr(meeting, 'company_logo', None):
             logo_filename = meeting.company_logo
         else:
-        logo_filename = logo_mapping.get(company_name, default_logo_filename)
+            logo_filename = logo_mapping.get(company_name, default_logo_filename)
         if not logo_filename:
             logo_filename = default_logo_filename
         logo_path_check = os.path.join(basedir, 'static', 'images', logo_filename)
@@ -1074,7 +1074,7 @@ def generate_meeting_pdf(meeting_id):
             path = cd.chromium_executable()
             if path and os.path.exists(path):
                 executable_path = path
-                else:
+            else:
                 # Download on-demand as a fallback
                 await cd.download_chromium()
                 path2 = cd.chromium_executable()
