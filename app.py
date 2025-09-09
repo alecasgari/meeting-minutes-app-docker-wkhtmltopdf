@@ -1067,13 +1067,7 @@ def generate_meeting_pdf(meeting_id):
     )
 
     async def render_pdf(content: str) -> bytes:
-        browser = await launch(
-            args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--no-zygote'],
-            handleSIGINT=False,
-            handleSIGTERM=False,
-            handleSIGHUP=False,
-            headless=True
-        )
+        browser = await launch(args=['--no-sandbox'], handleSIGINT=False, handleSIGTERM=False, handleSIGHUP=False, headless=True)
         page = await browser.newPage()
         await page.setContent(content)
         await page.waitForSelector('body')
